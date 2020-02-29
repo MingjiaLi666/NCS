@@ -239,8 +239,6 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             Corr1 = [0] * train_cpus
 
             for i in range(train_cpus):
-                # logger.log("i:%s" % i)
-                # logger.log(time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))
                 para = ppp[optimizer.n*i:optimizer.n*(i+1)]
                 para1 = ppp1[optimizer.n * i:optimizer.n * (i + 1)]
 
@@ -267,6 +265,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
                     sigmas[i] = sigmas1[i]
                     rews[i] = rews1[i]
                     updateCount[i]+=1
+            comm.Bcast([updateCount, MPI.FLOAT], root=0)
 
 
         # Steps passed = Sum of episode steps from all offsprings
