@@ -1,5 +1,5 @@
 {
-  "optimizer": "CanonicalESOptimizer",
+  "optimizer": "NCSOptimizer",
   "settings": {
     "learning_rate": 1,
     "sigma": 0.01,
