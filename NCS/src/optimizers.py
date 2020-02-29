@@ -257,6 +257,10 @@ class NCSOptimizer(BaseOptimizer):
 
         self.lam = lam
         self.sigma = settings['sigma']
+        self.parameters1 = None
+        self.rew = 0
+        self.rew1 =0
+        self.updateCount = 0
 
         # One could experiment with different learning_rates.
         # Disabled for our experiments (by setting to 1).
@@ -288,34 +292,60 @@ class NCSOptimizer(BaseOptimizer):
         #    return None, self.parameters
         #noise = np.random.normal(scale = self.sigma,size = (1,self.n))
         #p = self.parameters + noise
-        return None,self.parameters		
-    def update(self):
-        return None
-    def updatesigma(self,epoch,upC):
-        c = upC[self.rank-1]
-        if c/epoch<0.2:
+        return self.parameters
+    def get_parameters1(self):
+        self.parameters1 = self.parameters + np.random.normal(scale = self.sigma,size = self.n)
+        return self.parameters1
+    def update(self,ppp,BestScore,sigmas,llambda):
+        def calBdistance(n, para, para1, sigma, sigma1):
+            xixj = para - para1
+            part1 = 1 / 8 * np.dot(xixj, xixj.T) * 2 / (sigma ** 2 + sigma1 ** 2 + 1e-8)
+            part2 = 1 / 2 * n * np.log(1e-8 + (sigma ** 2 + sigma1 ** 2) / (2 * sigma * sigma1 + 1e-8))
+            return part1 + part2
+
+        def calCorr(n, ppp, para1, sigmalist, sigma1, order1):
+            # order = np.argsort(nums)
+
+            DBlist = []
+            for i in range(len(sigmalist)):
+                if i != order1:
+                    para = ppp[n * i:n * (i + 1)]
+
+                    sigma = sigmalist[i]
+
+                    DB = calBdistance(n, para, para1, sigma, sigma1)
+
+                    DBlist.append(DB)
+            return np.min(DBlist)
+        Corr = calCorr(self.n, ppp, self.parameters, sigmas, self.sigma, self.rank-1)
+        Corr1= calCorr(self.n, ppp, self.parameters1, sigmas, self.sigma, self.rank-1)
+        Corr1 = Corr1 / (Corr + Corr1)
+        fx = -self.rew + BestScore
+        fx1 = -self.rew1 + BestScore
+        fx1 = fx1 / (fx + fx1)
+        jud = fx1 / Corr1
+        if jud < llambda:
+            self.parameters = self.parameters1
+            self.rew = self.rew1
+            self.updateCount += 1
+
+    def updatesigma(self,epoch):
+
+        if self.updateCount/epoch<0.2:
             self.sigma = self.sigma * 0.99
-        elif c/epoch>0.2:
+        elif self.updateCount/epoch>0.2:
             self.sigma = self.sigma / 0.99
 
 
 
-
-
-
-
-
-
-
-
     def log_basic(self, logger):
-        logger.log('Lambda'.ljust(25) + '%d' % self.lam)
-        logger.log('Mu'.ljust(25) + '%d' % self.u)
+        # logger.log('Lambda'.ljust(25) + '%d' % self.lam)
+        # logger.log('Mu'.ljust(25) + '%d' % self.u)
         logger.log('LearningRate'.ljust(25) + '%f' % self.lr)
-        logger.log('MuW'.ljust(25) + '%f' % self.u_w)
-        logger.log('CSigma'.ljust(25) + '%f' % self.c_sigma)
-        logger.log('CSigmaFactor'.ljust(25) + '%f' % self.c_sigma_factor)
-        logger.log('Const1'.ljust(25) + '%f' % self.const_1)
+        # logger.log('MuW'.ljust(25) + '%f' % self.u_w)
+        # logger.log('CSigma'.ljust(25) + '%f' % self.c_sigma)
+        # logger.log('CSigmaFactor'.ljust(25) + '%f' % self.c_sigma_factor)
+        # logger.log('Const1'.ljust(25) + '%f' % self.const_1)
 
     def log(self, logger):
         logger.log('ParamNorm'.ljust(20) + '%f' % self.magnitude(self.parameters))
