@@ -93,7 +93,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             paras = p
             # nums [i] = rank + i
             # sig [i] = optimizer.sigma
-        msg = np.array(rews)
+        msg = np.array(rews,dtype=np.int32)
         pp = paras.flatten()
 
     # Only rank 0 worker will log information from the training
