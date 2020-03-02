@@ -204,7 +204,6 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             iteration_time = (time.time() - iter_start_time)
             time_elapsed = (time.time() - start_time)/60
             logger.log('------------------------------------')
-            logger.log(time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))
             logger.log('Iteration'.ljust(25) + '%f' % iteration)
             logger.log('EvalMeanReward'.ljust(25) + '%f' % eval_mean_rew)
             logger.log('EvalMeanReward1'.ljust(25) + '%f' % eval_mean_rew1)
@@ -212,8 +211,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             logger.log('StepsSinceStart'.ljust(25)+'%f' %steps_passed)
             logger.log('IterationTime'.ljust(25) + '%f' % iteration_time)
             logger.log('TimeSinceStart'.ljust(25) + '%d' %time_elapsed)
-            logger.log('Best'.ljust(25) + '%f' %BestScore)			
-
+            logger.log('Best'.ljust(25) + '%f' %BestScore)
             # Give optimizer a chance to log its own stuff
             optimizer.log(logger)
             logger.log('------------------------------------')
@@ -241,6 +239,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
         else:
             if iteration%epoch ==0:
                 optimizer.updatesigma(epoch)
+                logger.log('sigamasfor'.ljust(25) + '%d'+'is'+'%f' %optimizer.rank,optimizer.sigma)
         iteration+=1
     #test best
     if rank == 0:
