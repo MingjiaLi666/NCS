@@ -257,7 +257,7 @@ class NCSOptimizer(BaseOptimizer):
 
         self.lam = lam
         self.sigma = settings['sigma']
-        self.parameters1 = None
+        self.parameters1 = self.parameters
         self.rew = 0
         self.rew1 =0
         self.updateCount = 0
