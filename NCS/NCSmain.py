@@ -142,7 +142,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             # Empty arrays for each episode. We save: length, reward, noise index
             lens1 = [0] * ep_per_cpu
             rews1 = [0] * ep_per_cpu
-            # nums1 = [0] * ep_per_cpu
+            orew = [0] * ep_per_cpu
             sig1 = [0] * ep_per_cpu
             paras1 = None
             # For each episode in this CPU we get new parameters,
@@ -159,20 +159,20 @@ def main(ep_per_cpu, game, configuration_file, run_name):
                 lens1[i] = e_l
                 rews1[i] = e_r/k
                 optimizer.rew1 = e_r/k
-                # nums1[i] = rank+i
+                orew[i] = optimizer.rew
                 sig1[i] = optimizer.sigma
                 paras1 = p
             # Aggregate information, will later send it to each worker using MPI
-            msg1 = np.array(rews1 + lens1 +sig1, dtype=np.int32)
+            msg1 = np.array(rews1 + lens1 +sig1+orew, dtype=np.int32)
             pp1 = paras1.flatten()
         # Worker rank 0 that runs evaluation episodes
         else:
             # Empty array, evaluation results are not used for the update
-            msg1 = np.zeros(3 * ep_per_cpu, dtype=np.int32)
+            msg1 = np.zeros(4 * ep_per_cpu, dtype=np.int32)
             pp1 = np.zeros((ep_per_cpu, optimizer.n))
         # MPI stuff
         # Initialize array which will be updated with information from all workers using MPI
-        results1 = np.empty((cpus, 3 * ep_per_cpu), dtype=np.int32)
+        results1 = np.empty((cpus, 4 * ep_per_cpu), dtype=np.int32)
         ppp1 = np.empty((cpus, optimizer.n * ep_per_cpu))
         comm.Allgather([msg1, MPI.INT], [results1, MPI.INT])
         comm.Allgather([pp1, MPI.FLOAT], [ppp1, MPI.FLOAT])
@@ -183,8 +183,10 @@ def main(ep_per_cpu, game, configuration_file, run_name):
         # Extract IDs and rewards
         rews1 = results1[:, :ep_per_cpu].flatten()
         lens1 = results1[:, ep_per_cpu:(2*ep_per_cpu)].flatten()
-        sigmas1 = results1[:, (2 * ep_per_cpu):].flatten()
+        sigmas1 = results1[:, (2 * ep_per_cpu):(3 * ep_per_cpu)].flatten()
+        oreward = results1[:, (3 * ep_per_cpu):].flatten()
         newBestidx = np.argmax(rews1)
+        eval_mean_rew = np.mean(oreward)
         eval_mean_rew1 = np.mean(rews1)
         if np.max(rews1)>BestScore:
             BestScore = rews1[newBestidx]
@@ -204,8 +206,8 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             logger.log('------------------------------------')
             logger.log(time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))
             logger.log('Iteration'.ljust(25) + '%f' % iteration)
-            # logger.log('EvalMeanReward'.ljust(25) + '%f' % eval_mean_rew)
-            logger.log('EvalMeanReward'.ljust(25) + '%f' % eval_mean_rew1)
+            logger.log('EvalMeanReward'.ljust(25) + '%f' % eval_mean_rew)
+            logger.log('EvalMeanReward1'.ljust(25) + '%f' % eval_mean_rew1)
             logger.log('StepsThisIter'.ljust(25) + '%f' % steps)
             logger.log('StepsSinceStart'.ljust(25)+'%f' %steps_passed)
             logger.log('IterationTime'.ljust(25) + '%f' % iteration_time)
