@@ -8,7 +8,7 @@ class BaseOptimizer(object):
         # Worker id (MPI stuff).
         self.rank = rank
         # 2 GB of random noise as in OpenAI paper.
-        self.noise_table = np.random.RandomState(123).randn(int(5e8)).astype('float32')
+#         self.noise_table = np.random.RandomState(123).randn(int(5e8)).astype('float32')
         # Dimensionality of the problem
         self.n = len(parameters)
         # Current solution (The one that we report).
@@ -20,8 +20,8 @@ class BaseOptimizer(object):
         self.iteration = 0
 
     # Sample random index from the noise table.
-    def r_noise_id(self):
-        return np.random.random_integers(0, len(self.noise_table)-self.n)
+#     def r_noise_id(self):
+#         return np.random.random_integers(0, len(self.noise_table)-self.n)
 
     # Returns parameters to evaluate for a worker and an ID.
     # ID is used when computing update step (It might indicate index in the noise table).
