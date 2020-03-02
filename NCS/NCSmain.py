@@ -101,6 +101,12 @@ def main(ep_per_cpu, game, configuration_file, run_name):
     if rank == 0:
         # Initialize logger, save virtual batch and save some basic stuff at the beginning
         logger.save_vb(vb)
+        logger.log('Game'.ljust(25) + '%s' % game)
+        logger.log('Network'.ljust(25) + '%s' % configuration['network'])
+        logger.log('Optimizer'.ljust(25) + '%s' % configuration['optimizer'])
+        logger.log('Number of CPUs'.ljust(25) + '%d' % cpus)
+        logger.log('Population'.ljust(25) + '%d' % lam)
+        logger.log('Dimensionality'.ljust(25) + '%d' % len(parameters))
 
         # Log basic info from the optimizer
         optimizer.log_basic(logger)
