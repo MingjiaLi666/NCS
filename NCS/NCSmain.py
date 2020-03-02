@@ -239,7 +239,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
         else:
             if iteration%epoch ==0:
                 optimizer.updatesigma(epoch)
-                logger.log('sigamasfor'.ljust(25) + '%d'+'is'+'%f' %optimizer.rank,optimizer.sigma)
+#                 logger.log('sigamasfor'.ljust(25) + '%d'+'is'+'%f' %optimizer.rank,optimizer.sigma)
         iteration+=1
     #test best
     if rank == 0:
