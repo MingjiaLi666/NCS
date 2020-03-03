@@ -210,7 +210,7 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             logger.log('StepsThisIter'.ljust(25) + '%f' % steps)
             logger.log('StepsSinceStart'.ljust(25)+'%f' %steps_passed)
             logger.log('IterationTime'.ljust(25) + '%f' % iteration_time)
-            logger.log('TimeSinceStart'.ljust(25) + '%d' %time_elapsed)
+            logger.log('TimeSinceStart'.ljust(25) + '%f' %time_elapsed)
             logger.log('Best'.ljust(25) + '%f' %BestScore)
             # Give optimizer a chance to log its own stuff
             optimizer.log(logger)
