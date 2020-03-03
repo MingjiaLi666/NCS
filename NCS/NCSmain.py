@@ -81,8 +81,8 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             e_r = 0
             # e_l = 0
             p = optimizer.get_parameters()
+            policy.set_parameters(p)
             for j in range(k):
-                policy.set_parameters(p)
                 e_rew, e_len = policy.rollout()
                 e_r += e_rew
             #     e_l += e_len
@@ -151,8 +151,8 @@ def main(ep_per_cpu, game, configuration_file, run_name):
                 e_r = 0
                 e_l = 0
                 p = optimizer.get_parameters1()
+                policy.set_parameters(p)
                 for j in range(k):
-                    policy.set_parameters(p)
                     e_rew, e_len = policy.rollout()
                     e_r += e_rew
                     e_l += e_len
@@ -217,9 +217,9 @@ def main(ep_per_cpu, game, configuration_file, run_name):
             logger.log('------------------------------------')
             if iteration % 20 == 1:
                 fin_rews = 0
+                p = BestFound
+                policy.set_parameters(p)
                 for i in range(30):
-                    p = BestFound
-                    policy.set_parameters(p)
                     e_rew, e_len = policy.rollout()
                     fin_rews+=e_rew
                 fin_eval = fin_rews/30
@@ -244,9 +244,9 @@ def main(ep_per_cpu, game, configuration_file, run_name):
     #test best
     if rank == 0:
         final_rews = []
+        p = BestFound
+        policy.set_parameters(p)
         for i in range(200):
-            p = BestFound
-            policy.set_parameters(p)
             e_rew, e_len = policy.rollout()
             final_rews.append(e_rew)
         final_eval = np.mean(final_rews)
